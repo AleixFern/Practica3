@@ -1,25 +1,32 @@
 #!/bin/bash
 
-pos=0
-neg=0
-zero=0
+echo "Enter the path to the file:"
+read file
 
-for n in "$@"; do
-  # Check if n is a number
-  if ! [ "$n" -eq "$n" ] 2>/dev/null; then
-    echo "'$n' is not a valid integer. Skipping."
-    continue
-  fi
+# Check if file exists
+if [ ! -f "$file" ]; then
+  echo "File not found."
+  exit 1
+fi
 
-  if [ "$n" -gt 0 ]; then
-    pos=$((pos + 1))
-  elif [ "$n" -lt 0 ]; then
-    neg=$((neg + 1))
-  else
-    zero=$((zero + 1))
-  fi
-done
+# Create a copy without the lines starting with #
+cleaned="cleaned_$(basename "$file")"
+grep -v '^#' "$file" > "$cleaned"
+echo "Comments removed. Cleaned file saved as: $cleaned"
 
-echo "Positive numbers: $pos"
-echo "Negative numbers: $neg"
-echo "Zeros: $zero"
+# Ask user for a word/phrase to search
+echo "Enter a word or phrase to search:"
+read word
+
+# Check if it exists in the new file
+if grep -iq "$word" "$cleaned"; then
+  echo "The phrase '$word' was found in the file."
+else
+  echo "The phrase '$word' was NOT found in the file."
+fi
+
+# Ask user to add a sentence at the end
+echo "Now enter a sentence to add at the end of the file:"
+read sentence
+echo "$sentence" >> "$cleaned"
+echo "Sentence added to the end of $cleaned"
